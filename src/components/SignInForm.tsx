@@ -1,8 +1,9 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import styled from '@emotion/styled/macro';
 import * as yup from 'yup';
 import { FontSize } from '../constants/base';
 import MessageBox from './MessageBox';
+import { authenticate } from '../service/user';
 
 const Form = styled.form`
   font-family: Noto Sans JP;
@@ -35,6 +36,7 @@ const SignInForm: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [messages, setMessages] = useState<string[]|null>(null);
+  const [canSubmit, setCanSubmit] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
 
   const onChangeField = useCallback(
@@ -48,7 +50,7 @@ const SignInForm: React.FC = () => {
           break;
       }
     },
-    [email, password],
+    [],
   );
 
   const validate = async (values: {[key: string]: string}): Promise<void> => {
@@ -71,30 +73,52 @@ const SignInForm: React.FC = () => {
     }
   };
 
-  const onSubmitForm = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
+  useEffect(() => {
+    (async () => {
+      if (canSubmit) {
+        setMessages(null);
+        try {
+          await authenticate(email, password);
+          setEmail('');
+          setPassword('');
+          setMessages(['Sign In Successfully.']);
+          setCanSubmit(false);
+          setHasError(false);
+        } catch (error) {
+          setMessages([error.message]);
+          setCanSubmit(false);
+          setHasError(true);
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSubmit]);
 
-    const formValues = {
-      email,
-      password,
-    };
+  const onSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+      event.preventDefault();
 
-    try {
-      await validate(formValues);
+      const formValues = {
+        email,
+        password,
+      };
 
-      setEmail('');
-      setPassword('');
-      setMessages(['Sign In Successfully.']);
-      setHasError(false);
-    } catch (error) {
-      setMessages(error.errors);
-      setHasError(true);
-    }
-  };
+      try {
+        await validate(formValues);
+        setCanSubmit(true);
+        setHasError(false);
+      } catch (error) {
+        setMessages(error.errors);
+        setCanSubmit(false);
+        setHasError(true);
+      }
+    },
+    [email, password],
+  );
 
   return (
     <Form
-      onSubmit={onSubmitForm}
+      onSubmit={onSubmit}
     >
       <Field
         name='email'
