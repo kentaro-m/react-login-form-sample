@@ -12,7 +12,8 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.0",
-    "typescript": "3.5.3"
+    "typescript": "3.5.3",
+    "yup": "^0.27.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -34,5 +35,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/validator": "^10.11.2",
+    "@types/yup": "^0.26.22"
   }
 }
