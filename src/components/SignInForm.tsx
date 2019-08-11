@@ -7,7 +7,9 @@ import { authenticate } from '../service/user';
 
 const Form = styled.form`
   font-family: Noto Sans JP;
-  width: 25%;
+  width: 300px;
+  background: #fff;
+  padding: 40px;
 `;
 
 const Field = styled.input`
