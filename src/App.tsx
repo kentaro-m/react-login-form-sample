@@ -2,6 +2,10 @@ import React from 'react';
 import './App.css';
 import SignInForm from './components/SignInForm';
 import styled from '@emotion/styled/macro';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faEye, faEyeSlash);
 
 const Container = styled.div`
   display: flex;

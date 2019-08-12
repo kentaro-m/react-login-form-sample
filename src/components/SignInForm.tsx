@@ -1,6 +1,8 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState, MouseEvent} from 'react';
 import styled from '@emotion/styled/macro';
+import css from '@emotion/css/macro'
 import * as yup from 'yup';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FontSize } from '../constants/base';
 import MessageBox from './MessageBox';
 import { authenticate } from '../service/user';
@@ -12,7 +14,19 @@ const Form = styled.form`
   padding: 40px;
 `;
 
-const Field = styled.input`
+const FieldWrapperStyle = css`
+  position: relative;
+`;
+
+const EmailFieldWrapper = styled.div`
+  ${FieldWrapperStyle}
+`;
+
+const PasswordFieldWrapper = styled.div`
+  ${FieldWrapperStyle}
+`;
+
+const FieldStyle = css`
   display: block;
   width: 100%;
   height: 40px;
@@ -22,6 +36,15 @@ const Field = styled.input`
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
+`;
+
+const EmailField = styled.input`
+  ${FieldStyle}
+`;
+
+const PasswordField = styled.input`
+  ${FieldStyle}
+  padding: 0 45px 0 10px;
 `;
 
 const SignInButton = styled.button`
@@ -34,12 +57,22 @@ const SignInButton = styled.button`
   font-weight: bold;
 `;
 
+const PasswordVisibleButton = styled.button`
+  font-size: ${FontSize.Regular};
+  color: #333;
+  border: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+`;
+
 const SignInForm: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [messages, setMessages] = useState<string[]|null>(null);
   const [canSubmit, setCanSubmit] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [visiblePassword, setVisiblePassword] = useState<boolean>(false);
 
   const onChangeField = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +86,17 @@ const SignInForm: React.FC = () => {
       }
     },
     [],
+  );
+
+  const onClickButton = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      switch (event.currentTarget.name) {
+        case 'visible_password':
+          setVisiblePassword(!visiblePassword);
+          break;
+      }
+    },
+    [visiblePassword],
   );
 
   const validate = async (values: {[key: string]: string}): Promise<void> => {
@@ -122,26 +166,39 @@ const SignInForm: React.FC = () => {
     <Form
       onSubmit={onSubmit}
     >
-      <Field
-        name='email'
-        placeholder='Email'
-        type='email'
-        value={email}
-        onChange={onChangeField}
-      />
-      <Field
-        name='password'
-        placeholder='Password'
-        type='password'
-        value={password}
-        onChange={onChangeField}
-      />
+      <EmailFieldWrapper>
+        <EmailField
+          name='email'
+          placeholder='Email'
+          type='email'
+          value={email}
+          onChange={onChangeField}
+        />
+      </EmailFieldWrapper>
+      <PasswordFieldWrapper>
+        <PasswordField
+          name='password'
+          placeholder='Password'
+          type={visiblePassword ? 'text' : 'password'}
+          value={password}
+          onChange={onChangeField}
+        />
+        <PasswordVisibleButton
+          type='button'
+          name='visible_password'
+          onClick={onClickButton}
+        >
+          <FontAwesomeIcon icon={visiblePassword ? 'eye-slash' : 'eye'} />
+        </PasswordVisibleButton>
+      </PasswordFieldWrapper>
       {messages &&
         <MessageBox
           messages={messages}
           status={hasError ? 'failure' : 'success'}
         />}
-      <SignInButton>
+      <SignInButton
+        type='submit'
+      >
         SIGN IN
       </SignInButton>
     </Form>
